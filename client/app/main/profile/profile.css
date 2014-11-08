@@ -10,8 +10,8 @@
   margin-top:40px;
 }
 
-#profile-view #corp-chart {
-
+#profile-view #corp-chart .tooltip{
+  color:red;
 }
 
 #seperator {

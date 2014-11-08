@@ -1,9 +1,75 @@
 angular.module('myCongressApp')
+.directive('hcPie', function () {
+  return {
+    restrict: 'C',
+    replace: true,
+    scope: {
+      items: '='
+    },
+    controller: function ($scope, $element, $attrs) {
+      console.log(2);
 
-  .controller('profileController', function($scope, Profile, Politicians, Donors, Charts, $stateParams, sectorCodes){
+    },
+    template: '<div id="container" style="margin: 0 auto">not working</div>',
+    link: function (scope, element, attrs, $filter) {
+      console.log(3);
+      var chart = new Highcharts.Chart({
+        chart: {
+          renderTo: 'container',
+          plotBackgroundColor: null,
+          plotBorderWidth: null,
+          plotShadow: false,
+          margin: [0, 0, 0, 0],
+                  spacingTop: 0,
+                  spacingBottom: 0,
+                  spacingLeft: 0,
+                  spacingRight: 0
+        },
+        title: {
+          text: 'Browser market shares at a specific website, 2010',
+          style: {
+            color: 'white'
+          }
+        },
+        tooltip: {
+          pointFormat: '{series.name}: <b>${point.y}</b>'
+        },
+        plotOptions: {
+          pie: {
+            size:'25%',
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+              enabled: true,
+              // color: this.point.color,
+              // connectorColor: this.point.color,
+              formatter: function () {
+                // var value = $filter('currency',this.total);
+                console.log(this);
+                var value = this.y;
+                return '<span style="color:'+this.point.color+'">' + this.point.name + ': ' + value + '</span>';
+              }
+            }
+          }
+        },
+        series: [{
+          type: 'pie',
+          name: 'Browser share',
+          data: scope.items
+        }]
+      });
+      scope.$watch("items", function (newValue) {
+        chart.series[0].setData(newValue, true);
+      }, true);
+      
+    }
+  }
+})
+
+  .controller('profileController', function($scope, limitToFilter, Profile, Politicians, Donors, Charts, $stateParams, sectorCodes){
     var id = $stateParams.id;
     $scope.sectorCodes = sectorCodes;
-    $scope.gg = Charts.pieChart();
+
     Politicians.getRep(id).then(function (data) {
       var current = data.data.results[0];
       var parties = {'D': 'Democrat', 'R': 'Republican', 'I': 'Independent'};
@@ -34,54 +100,12 @@ angular.module('myCongressApp')
             var name = data.data[i].name;
             var amount = parseInt(data.data[i].total_amount);
             $scope.corpData.push([name, amount]);
+            // console.log(amount);
           }
           $scope.corpToggle = true;
-          $scope.CorpChartConfig = {
-            chart: {
-              plotBackgroundColor: null,
-              plotBorderWidth: null,
-              plotShadow: false,
-              backgroundColor:'rgba(0, 0, 0, 0)'
-            },
-            title: {
-              text: 'Top Corporate Donors',
-              style: {
-                color: '#f5f5f5'
-              }
-            },
-            subtitle: {
-              text: 'From company employees',
-              style: {
-                color: '#a5a5a5'
-              }
-            },
+          $scope.CorpChartConfig = new Highcharts.Chart({
 
-            series: [{
-              type: 'pie',
-              name: 'Total Contribution',
-              data: $scope.corpData,
-            }],
-            tooltip: {
-              valuePrefix: '$',
-              valueSuffix: '',
-              style: {
-                color: '#e5e5e5'
-              }
-            },
-            plotOptions: {
-              pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                  enabled: true,
-                  format: '<b>{point.name}</b> ',
-                  style: {
-                    color: 'blue'
-                  }
-                }
-              }
-            }
-          }
+          });
         });
 
 $scope.sectorToggle = false;
